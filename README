@@ -1,0 +1,106 @@
+# Cheetah Detection using YOLOv12
+
+This project implements a custom object detection model designed to identify cheetahs in images and video. It utilizes the state-of-the-art **YOLOv12** architecture, specifically the "Attention-Centric" design, to achieve high accuracy and efficiency. The project involves data annotation, hyperparameter tuning, model training, and performance evaluation.
+
+## Project Overview
+
+* **Objective:** Detect and classify cheetahs in various environments.
+* **Model:** YOLOv12-Small (`yolov12s.pt`).
+* **Framework:** Ultralytics YOLO (PyTorch).
+* **Performance:** Achieved a **mAP50 of 0.995** and **Recall of 1.0** on the validation set.
+
+## Features
+
+* **Hyperparameter Tuning:** Automated search for optimal learning rate, weight decay, and HSV augmentation settings to maximize model performance.
+* **Custom Training:** Trained on a manually annotated dataset of cheetah images.
+* **Inference Pipeline:** Scripts to run detection on static image test sets and video files (`.mp4`).
+* **Evaluation:** Includes analysis of precision, recall, and confusion matrices.
+
+## File Structure
+
+* `tune.py`: Script to perform hyperparameter tuning using the AdamW optimizer. It searches for optimal values for learning rate, weight decay, saturation, and brightness.
+* `train_with_best.py`: The main training script. It loads the best hyperparameters identified during the tuning phase and trains the final model for 100 epochs.
+* `test.py`: Inference script. Loads the trained weights (`best.pt`) and generates predictions for a folder of test images and a video file.
+* `u22571532_COS791_A2.pdf`: Project report detailing the theoretical background of YOLO versions, experimental setup, and critical analysis of results.
+
+## Requirements
+
+To run this project, you need a Python environment with the Ultralytics framework installed. A GPU is highly recommended for training.
+
+```bash
+pip install ultralytics pyyaml
+
+```
+
+## Usage
+
+### 1. Hyperparameter Tuning
+
+Run the tuning script to explore the search space and find the best configuration for the dataset.
+
+```bash
+python tune.py
+
+```
+
+* **Settings:** 30 iterations, 15 epochs per iteration.
+* **Search Space:** Learning rate, weight decay, HSV saturation, HSV value.
+
+### 2. Training
+
+Train the final model using the optimized hyperparameters found in step 1.
+
+```bash
+python train_with_best.py
+
+```
+
+* **Base Model:** YOLOv12s
+* **Epochs:** 100
+* **Batch Size:** 16
+* **Image Size:** 640
+
+### 3. Inference / Testing
+
+Run detection on new data.
+
+```bash
+python test.py
+
+```
+
+This script will:
+
+1. Load the trained model.
+2. Predict bounding boxes for images in `dataset/test/images/`.
+3. Process `vid.mp4` and save the output.
+4. Save results to `runs/detect/predict/`.
+
+## Model Configuration
+
+The final model was trained using the following specific hyperparameters derived from the tuning process:
+
+| Parameter | Value |
+| --- | --- |
+| **Base Model** | YOLOv12s |
+| **Optimizer** | Auto (AdamW) |
+| **Learning Rate (`lr0`)** | 0.0087 |
+| **Weight Decay** | 0.00042 |
+| **HSV Saturation** | 0.7263 |
+| **HSV Brightness** | 0.44274 |
+
+## Results
+
+The model demonstrates exceptional performance on the validation dataset:
+
+* **mAP50:** 0.995
+* **mAP50-95:** 0.757
+* **Precision:** 0.992
+* **Recall:** 1.0
+
+### Limitations
+
+While the model performs well, analysis shows it may struggle with:
+
+* **Small Objects:** Cheetahs situated far away in the background.
+* **Similar Classes:** Occasionally misclassifying tigers as cheetahs due to the lack of negative samples (other animals) in the training set.
